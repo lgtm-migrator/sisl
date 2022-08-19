@@ -8,7 +8,9 @@ Sile object for reading/writing PDB files
 import numpy as np
 
 # Import sile objects
-from .sile import *
+from .sile import sile_fh_open, add_sile
+from .sile import Sile, sile_raise_write
+from ._def_args import wrap_read_geometry
 
 from sisl._internal import set_module
 from sisl import Geometry, SuperCell, Atoms, Atom
@@ -203,6 +205,7 @@ class pdbSile(Sile):
         self._w_model(False)
 
     @sile_fh_open()
+    @wrap_read_geometry
     def read_geometry(self):
         """ Read geometry from the contained file """
 
@@ -247,7 +250,7 @@ class pdbSile(Sile):
                 atoms._atom.append(a)
             atoms._specie[i] = s
 
-        return Geometry(xyz, atoms, sc=sc)
+        return sc, atoms, xyz
 
     def ArgumentParser(self, p=None, *args, **kwargs):
         """ Returns the arguments that is available for this Sile """

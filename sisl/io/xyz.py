@@ -8,7 +8,9 @@ import numpy as np
 
 # Import sile objects
 from ._help import header_to_dict
-from .sile import *
+from .sile import sile_fh_open, add_sile
+from .sile import Sile, sile_raise_write
+from ._def_args import wrap_read_geometry
 
 from sisl._internal import set_module
 from sisl import Geometry, SuperCell
@@ -57,38 +59,35 @@ class xyzSile(Sile):
             s = {'fa': 'Ds'}.get(a.symbol, a.symbol)
             self._write(fmt_str.format(s, *geometry.xyz[ia, :]))
 
-    def _r_geometry_sisl(self, na, header, sp, xyz, sc):
+    def _r_geometry_sisl(self, na, header, atoms, xyz):
         """ Read the geometry as though it was created with sisl """
         # Default version of the header is 1
         #v = int(header.get("sisl-version", 1))
         nsc = list(map(int, header.pop("nsc").split()))
         cell = _a.fromiterd(header.pop("cell").split()).reshape(3, 3)
-        if sc is None:
-            sc = SuperCell(cell, nsc=nsc)
-        return Geometry(xyz, atoms=sp, sc=sc)
+        sc = SuperCell(cell, nsc=nsc)
+        return sc, atoms, xyz
 
-    def _r_geometry_ase(self, na, header, sp, xyz, sc):
+    def _r_geometry_ase(self, na, header, atoms, xyz):
         """ Read the geometry as though it was created with ASE """
         # Convert F T to nsc
         #  F = 1
         #  T = 3
         nsc = list(map(lambda x: "FT".index(x) * 2 + 1, header.pop("pbc").strip('"').split()))
         cell = _a.fromiterd(header.pop("Lattice").strip('"').split()).reshape(3, 3)
-        if sc is None:
-            sc = SuperCell(cell, nsc=nsc)
+        sc = SuperCell(cell, nsc=nsc)
+        return sc, atoms, xyz
 
-        return Geometry(xyz, atoms=sp, sc=sc)
-
-    def _r_geometry(self, na, sp, xyz, sc):
+    def _r_geometry(self, na, atoms, xyz):
         """ Read the geometry for a generic xyz file (not sisl, nor ASE) """
         # The cell dimensions isn't defined, we are going to create a molecule box
         cell = xyz.max(0) - xyz.min(0) + 10.
-        if sc is None:
-            sc = SuperCell(cell, nsc=[1] * 3)
-        return Geometry(xyz, atoms=sp, sc=sc)
+        sc = SuperCell(cell, nsc=[1] * 3)
+        return sc, atoms, xyz
 
     @sile_fh_open()
-    def read_geometry(self, atoms=None, sc=None):
+    @wrap_read_geometry
+    def read_geometry(self):
         """ Returns Geometry object from the XYZ file
 
         Parameters
@@ -106,16 +105,13 @@ class xyzSile(Sile):
         kv = header_to_dict(header)
 
         # Read atoms and coordinates
-        sp = [None] * na
+        atoms = [None] * na
         xyz = np.empty([na, 3], np.float64)
         line = self.readline
         for ia in range(na):
             l = line().split(maxsplit=5)
-            sp[ia] = l[0]
+            atoms[ia] = l[0]
             xyz[ia, :] = l[1:4]
-
-        if atoms is not None:
-            sp = atoms
 
         def _has_keys(d, *keys):
             for key in keys:
@@ -124,10 +120,10 @@ class xyzSile(Sile):
             return True
 
         if _has_keys(kv, "cell", "nsc"):
-            return self._r_geometry_sisl(na, kv, sp, xyz, sc)
+            return self._r_geometry_sisl(na, kv, atoms, xyz)
         elif _has_keys(kv, "Properties", "Lattice", "pbc"):
-            return self._r_geometry_ase(na, kv, sp, xyz, sc)
-        return self._r_geometry(na, sp, xyz, sc)
+            return self._r_geometry_ase(na, kv, atoms, xyz)
+        return self._r_geometry(na, atoms, xyz)
 
     def ArgumentParser(self, p=None, *args, **kwargs):
         """ Returns the arguments that is available for this Sile """

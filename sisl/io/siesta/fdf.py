@@ -1265,6 +1265,8 @@ class fdfSileSiesta(SileSiesta):
             the order of which to try and read the geometry.
             By default this is ``["XV", "nc", "fdf", "TSHS", "HSX", "STRUCT"]`` if `output` is true
             If `order` is present `output` is disregarded.
+        **kwargs : dict, optional
+            keyword arguments passed directly to the underlying methods
 
         Examples
         --------
