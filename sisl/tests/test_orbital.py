@@ -339,10 +339,6 @@ class Test_atomicorbital:
         rf = r_f(6)
         r = np.linspace(0, 6, 999).reshape(-1, 3)
         o = AtomicOrbital(l=1, m=1, spherical=rf)
-        with pytest.deprecated_call():
-            assert o.Z == o.zeta
-        with pytest.deprecated_call():
-            o = AtomicOrbital(l=1, m=1, spherical=rf, Z=1)
 
     def test_pickle1(self):
         import pickle as p

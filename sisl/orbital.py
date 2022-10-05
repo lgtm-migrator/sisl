@@ -16,7 +16,7 @@ from scipy.interpolate import UnivariateSpline
 from ._internal import set_module
 from . import _plot as plt
 from . import _array as _a
-from .messages import deprecate, deprecate_method
+from .messages import deprecate
 from .shape import Sphere
 from .utils.mathematics import cart2spher
 
@@ -933,12 +933,6 @@ class AtomicOrbital(Orbital):
 
     @property
     def zeta(self):
-        r""" :math:`\zeta` shell """
-        return self._zeta
-
-    @property
-    @deprecate_method("AtomicOrbital.Z is deprecated, please use .zeta instead")
-    def Z(self):
         r""" :math:`\zeta` shell """
         return self._zeta
 
