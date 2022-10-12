@@ -26,7 +26,7 @@ One may also plot real-space wavefunctions.
    conductivity
    wavefunction
    spin_moment
-   spin_squared
+   spin_contamination
 
 
 Supporting classes

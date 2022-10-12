@@ -30,6 +30,7 @@ we hit release version 1.0.0.
 - tbtrans files now have a separate entry in the documentation
 
 ### Changed
+- changed method name `spin_squared` to `spin_contamination`
 - enabled orbitals up to the h-shell, #491
 - swapped order of `honeycomb` (`graphene` derivatives)
   lattice vectors, to ensure the vectors are following right-hand-rule, #488

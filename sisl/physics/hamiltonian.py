@@ -7,7 +7,7 @@ from sisl._internal import set_module
 import sisl._array as _a
 from ..messages import deprecate_method
 from .distribution import get_distribution
-from .electron import EigenvalueElectron, EigenstateElectron, spin_squared
+from .electron import EigenvalueElectron, EigenstateElectron, spin_contamination
 from .sparse import SparseOrbitalBZSpin
 
 
@@ -416,9 +416,9 @@ class Hamiltonian(SparseOrbitalBZSpin):
             with get_sile(sile, 'w') as fh:
                 fh.write_hamiltonian(self, *args, **kwargs)
 
-    @deprecate_method("use Hamiltonian.eigenstate(...).spin_squared() instead", "0.13.0")
-    def spin_squared(self, k=(0, 0, 0), n_up=None, n_down=None, **kwargs):
-        r""" Calculate spin-squared expectation value, see `~sisl.physics.electron.spin_squared` for details
+    @deprecate_method("use Hamiltonian.eigenstate(...).spin_contamination() instead", "0.13.0")
+    def spin_contamination(self, k=(0, 0, 0), n_up=None, n_down=None, **kwargs):
+        r""" Calculate spin-squared expectation value, see `~sisl.physics.electron.spin_contamination` for details
 
         Parameters
         ----------
@@ -433,7 +433,7 @@ class Hamiltonian(SparseOrbitalBZSpin):
             additional parameters passed to the `eigenstate` routine
         """
         if not self.spin.is_polarized:
-            raise ValueError(self.__class__.__name__ + '.spin_squared requires as spin-polarized system')
+            raise ValueError(self.__class__.__name__ + '.spin_contamination requires as spin-polarized system')
         es_alpha = self.eigenstate(k, spin=0, **kwargs)
         if not n_up is None:
             es_alpha = es_alpha.sub(range(n_up))
@@ -441,7 +441,7 @@ class Hamiltonian(SparseOrbitalBZSpin):
         if not n_down is None:
             es_beta = es_beta.sub(range(n_down))
         # es_alpha.Sk should equal es_beta.Sk, so just pass one of them
-        return spin_squared(es_alpha.state, es_beta.state, es_alpha.Sk())
+        return spin_contamination(es_alpha.state, es_beta.state, es_alpha.Sk())
 
     @deprecate_method("use Hamiltonian.eigenstate(...).velocity() instead", "0.13.0")
     def velocity(self, k=(0, 0, 0), matrix=False, **kwargs):
