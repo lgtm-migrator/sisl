@@ -773,9 +773,7 @@ class AtomicOrbital(Orbital):
         n = kwargs.get("n", None)
         l = kwargs.get("l", None)
         m = kwargs.get("m", None)
-        if "Z" in kwargs:
-            deprecate(f"{self.__class__.__name__}(Z=) is deprecated, please use (zeta=) instead")
-        zeta = kwargs.get("zeta", kwargs.get("Z", 1))
+        zeta = kwargs.get("zeta", 1)
         P = kwargs.get("P", False)
 
         if len(args) > 0:
